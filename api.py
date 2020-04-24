@@ -1,10 +1,10 @@
-from app import app
 from face_rec import classify_face
 import os
 from flask import Flask, redirect, jsonify, session
 from flask import flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from app import app
 
 # extensi file yang di izinkan
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
