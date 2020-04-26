@@ -4,6 +4,7 @@ import cv2
 import face_recognition
 import numpy as np
 import json
+import math
 from time import sleep
 
 def get_encoded_faces():
@@ -28,26 +29,26 @@ def get_encoded_faces():
     return encoded
 
 
-def unknown_image_encoded(img):
-    base_dir = 'dataset/'
-    """
-    encode a face given the file name
-    """
-    for subdirs in os.listdir(base_dir):
-        for f in os.listdir(base_dir + subdirs):
-            face = fr.load_image_file(base_dir + subdirs + "/" + img)
-            encoding = fr.face_encodings(face)[0]
+# def unknown_image_encoded(img):
+#     base_dir = 'dataset/'
+#     """
+#     encode a face given the file name
+#     """
+#     for subdirs in os.listdir(base_dir):
+#         for f in os.listdir(base_dir + subdirs):
+#             face = fr.load_image_file(base_dir + subdirs + "/" + img)
+#             encoding = fr.face_encodings(face)[0]
 
-    return encoding
+#     return encoding
 
 
 def classify_face(im):
-    """
-    will find all of the faces in a given image and label
-    them if it knows what they are
-    :param im: str of file path
-    :return: list of face names
-    """
+    # """
+    # will find all of the faces in a given image and label
+    # them if it knows what they are
+    # :param im: str of file path
+    # :return: list of face names
+    # """
     faces = get_encoded_faces()
     faces_encoded = list(faces.values())
     known_face_names = list(faces.keys())
@@ -67,6 +68,19 @@ def classify_face(im):
 
         # use the known face with the smallest distance to the new face
         face_distances = face_recognition.face_distance(faces_encoded, face_encoding)
+
+        # confidence
+        for i, face_distance in enumerate(face_distances):
+            if face_distance > 0.6:
+                range = (1.0 - 0.6)
+                linear_val = (1.0 - face_distance) / (range * 2.0)
+                result = "{:.2}".format(linear_val)
+            else:
+                range = 0.6
+                linear_val = 1.0 - (face_distance / (range * 2.0))
+                calculate = linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))
+                result = "{:.2}".format(calculate)
+
         best_match_index = np.argmin(face_distances)
         if matches[best_match_index]:
             name = known_face_names[best_match_index]
@@ -77,4 +91,7 @@ def classify_face(im):
         
         for names in face_names:
             name = name
-    return name
+    return {
+        'name': name,
+        'confidence': result
+    }

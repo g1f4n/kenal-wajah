@@ -79,7 +79,7 @@ def Facereco():
         data = classify_face(path_image)
         response = {
             'status': True,
-            'name': data
+            'data': data
         }
     return jsonify(response)
 
